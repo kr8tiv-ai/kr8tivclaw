@@ -78,6 +78,10 @@ Run:
 npm test
 ```
 
+## KR8TIV-specific challenge backlog
+
+- See [`docs/CHALLENGES-BACKLOG.md`](docs/CHALLENGES-BACKLOG.md) for platform gaps we are actively baking into the distribution layer.
+
 ## Upstream-safe update workflow
 
 1. Track upstream OpenClaw image tags (stable/beta/dev).
