@@ -1,0 +1,29 @@
+{
+  "tenantId": "tenant-acme",
+  "updateRing": "stable",
+  "security": {
+    "pairing": true,
+    "mentionGating": true,
+    "sandboxNonMainSessions": true,
+    "toolAllowList": [
+      "sessions.list",
+      "sessions.send",
+      "browser.read"
+    ],
+    "toolDenyList": [
+      "shell.exec"
+    ],
+    "elevatedMode": false
+  },
+  "channels": {
+    "whatsapp": true,
+    "telegram": true
+  },
+  "memory": {
+    "retentionPolicy": "local+supermemory",
+    "supermemory": {
+      "enabled": true,
+      "containerTag": "tenant-acme"
+    }
+  }
+}
