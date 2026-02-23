@@ -1,0 +1,43 @@
+tenant:
+  id: tenant-acme
+  name: Acme Ops
+  containerTag: acme-prod
+  gatewayTokenEnv: OPENCLAW_GATEWAY_TOKEN
+persona:
+  soul: |
+    You are Acme's reliable operations assistant.
+  agents: |
+    Follow pairing rules, escalate when uncertain.
+  tools: |
+    Prefer read-only tools unless explicitly approved.
+  user: |
+    Primary user is Acme operations lead.
+  heartbeat: |
+    Emit heartbeat every 60 seconds and report anomalies.
+  memorySeed: |
+    Seed: Acme onboarding complete on 2026-01-20.
+security:
+  pairingRequired: true
+  mentionGateInGroups: true
+  nonMainSessionSandbox: strict
+  toolAllowList:
+    - browser.read
+    - files.read
+  toolDenyList:
+    - shell.exec
+compose:
+  image: ghcr.io/openclaw/openclaw:latest
+  stateVolume: acme_openclaw_state
+  workspaceVolume: acme_openclaw_workspace
+  watchdog:
+    enabled: true
+    webhookUrlEnv: WATCHDOG_WEBHOOK_URL
+    intervalSeconds: 60
+skills:
+  - workspace/safety-hardening
+  - workspace/tenant-memory
+supermemory:
+  baseUrl: https://api.supermemory.ai
+  apiKeyEnv: SUPERMEMORY_API_KEY
+  defaultThreshold: 0.5
+  minScore: 0.35

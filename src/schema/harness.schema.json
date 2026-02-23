@@ -1,0 +1,79 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tenant", "persona", "security", "compose", "skills", "supermemory"],
+  "properties": {
+    "tenant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "containerTag"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "containerTag": { "type": "string", "minLength": 1 },
+        "gatewayTokenEnv": { "type": "string", "minLength": 1 }
+      }
+    },
+    "persona": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["soul", "agents", "tools", "user", "heartbeat"],
+      "properties": {
+        "soul": { "type": "string", "minLength": 1 },
+        "agents": { "type": "string", "minLength": 1 },
+        "tools": { "type": "string", "minLength": 1 },
+        "user": { "type": "string", "minLength": 1 },
+        "heartbeat": { "type": "string", "minLength": 1 },
+        "memorySeed": { "type": "string" }
+      }
+    },
+    "security": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pairingRequired", "mentionGateInGroups", "nonMainSessionSandbox", "toolAllowList", "toolDenyList"],
+      "properties": {
+        "pairingRequired": { "type": "boolean" },
+        "mentionGateInGroups": { "type": "boolean" },
+        "nonMainSessionSandbox": { "type": "string", "enum": ["strict", "moderate"] },
+        "toolAllowList": { "type": "array", "items": { "type": "string" } },
+        "toolDenyList": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "compose": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image", "stateVolume", "workspaceVolume"],
+      "properties": {
+        "image": { "type": "string", "minLength": 1 },
+        "stateVolume": { "type": "string", "minLength": 1 },
+        "workspaceVolume": { "type": "string", "minLength": 1 },
+        "watchdog": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "webhookUrlEnv", "intervalSeconds"],
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "webhookUrlEnv": { "type": "string", "minLength": 1 },
+            "intervalSeconds": { "type": "integer", "minimum": 5 }
+          }
+        }
+      }
+    },
+    "skills": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "supermemory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseUrl", "apiKeyEnv", "defaultThreshold", "minScore"],
+      "properties": {
+        "baseUrl": { "type": "string", "minLength": 1 },
+        "apiKeyEnv": { "type": "string", "minLength": 1 },
+        "defaultThreshold": { "type": "number", "minimum": 0, "maximum": 1 },
+        "minScore": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    }
+  }
+}

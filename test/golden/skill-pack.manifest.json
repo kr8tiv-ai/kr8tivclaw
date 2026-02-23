@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "installPath": "./skills",
+  "skills": [
+    {
+      "id": "workspace/safety-hardening",
+      "source": "workspace"
+    },
+    {
+      "id": "workspace/tenant-memory",
+      "source": "workspace"
+    }
+  ]
+}

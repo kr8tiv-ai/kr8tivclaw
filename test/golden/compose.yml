@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  openclaw-gateway:
+    image: ghcr.io/openclaw/openclaw:latest
+    restart: unless-stopped
+    environment:
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN}
+      OPENCLAW_TENANT_ID: tenant-acme
+      OPENCLAW_CONTAINER_TAG: acme-prod
+      SUPERMEMORY_API_KEY: ${SUPERMEMORY_API_KEY}
+    volumes:
+      - acme_openclaw_state:/var/lib/openclaw
+      - acme_openclaw_workspace:/workspace
+    healthcheck:
+      test: ["CMD-SHELL", "node dist/index.js health --token $$OPENCLAW_GATEWAY_TOKEN"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  agent-watchdog:
+    image: curlimages/curl:8.11.1
+    restart: unless-stopped
+    environment:
+      WATCHDOG_WEBHOOK: ${WATCHDOG_WEBHOOK_URL}
+      WATCHDOG_INTERVAL: 60
+      TENANT_ID: tenant-acme
+    command: >-
+      sh -lc 'while true; do
+        ts=$(date -u +"%Y-%m-%dT%H:%M:%SZ");
+        payload="{\"tenantId\":\"$TENANT_ID\",\"timestamp\":\"$ts\",\"status\":\"alive\"}";
+        curl -sS -X POST -H "content-type: application/json" -d "$payload" "$WATCHDOG_WEBHOOK" || true;
+        sleep "$WATCHDOG_INTERVAL";
+      done'

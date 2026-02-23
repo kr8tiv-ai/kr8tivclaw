@@ -1,0 +1,31 @@
+{
+  "tenant": {
+    "id": "tenant-acme",
+    "name": "Acme Ops",
+    "containerTag": "acme-prod"
+  },
+  "security": {
+    "pairing": {
+      "required": true
+    },
+    "mentionGating": {
+      "groups": true
+    },
+    "sessions": {
+      "nonMainSandbox": "strict"
+    },
+    "tools": {
+      "allow": [
+        "browser.read",
+        "files.read"
+      ],
+      "deny": [
+        "shell.exec"
+      ]
+    }
+  },
+  "memory": {
+    "provider": "supermemory",
+    "containerTag": "acme-prod"
+  }
+}
