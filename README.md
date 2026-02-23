@@ -27,6 +27,7 @@ A thin, upstream-friendly distribution layer that compiles tenant harnesses into
   - scoped API key + containerTag model
   - ingestion with `customId` dedupe conventions
   - hybrid retrieval + threshold clamping
+  - request timeout + retry for transient failures
   - user profile upsert support
 
 ## Module boundaries
@@ -50,6 +51,12 @@ node dist/cli/harness.js --input ./harness.yaml --output ./out --compose-out ./o
 # compose only
 node dist/cli/harness.js --input ./harness.yaml --compose-only --compose-out ./out/docker-compose.yml
 ```
+
+
+CLI flags:
+- `--compose-only` generate only `docker-compose.yml`
+- `--validate-only` validate `harness.yaml` and exit non-zero on errors
+- `--help` print CLI help
 
 ## Supermemory conventions
 

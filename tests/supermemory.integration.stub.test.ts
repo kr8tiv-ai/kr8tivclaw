@@ -44,4 +44,22 @@ describe('supermemory wrapper integration stubs (mock HTTP)', () => {
     expect(body.customId).toBe(SupermemoryConventions.profileCustomId('user-7'));
     expect(body.metadata.kind).toBe('user-profile');
   });
+
+  it('retries transient 5xx failures', async () => {
+    const mockFetch = vi
+      .fn()
+      .mockResolvedValueOnce(new Response('oops', { status: 503 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'content-type': 'application/json' } }));
+
+    const client = new SupermemoryClient({
+      apiKey: 'scoped-key',
+      containerTag: 'tenant-tag',
+      fetchImpl: mockFetch as typeof fetch,
+      maxRetries: 1
+    });
+
+    const result = await client.retrieve({ query: 'retry me' });
+    expect(result).toEqual({ ok: true });
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
 });

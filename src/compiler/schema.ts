@@ -82,10 +82,28 @@ export const HarnessSchema = z
         message: 'memory.supermemory.containerTag is required when supermemory is enabled'
       });
     }
+
+    const overlap = data.tooling.allow.filter((tool) => data.tooling.deny.includes(tool));
+    if (overlap.length > 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['tooling'],
+        message: `tools cannot appear in both allow/deny lists: ${overlap.join(', ')}`
+      });
+    }
   });
 
 export type HarnessConfig = z.infer<typeof HarnessSchema>;
 
 export function parseHarness(raw: unknown): HarnessConfig {
   return HarnessSchema.parse(raw);
+}
+
+export function validateHarness(raw: unknown): { ok: true; data: HarnessConfig } | { ok: false; errors: string[] } {
+  const result = HarnessSchema.safeParse(raw);
+  if (result.success) return { ok: true, data: result.data };
+  return {
+    ok: false,
+    errors: result.error.issues.map((issue) => `${issue.path.join('.') || '(root)'}: ${issue.message}`)
+  };
 }

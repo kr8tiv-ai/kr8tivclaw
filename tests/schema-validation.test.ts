@@ -53,4 +53,17 @@ describe('harness schema validation', () => {
       })
     ).toThrowError(/containerTag/);
   });
+
+  it('rejects overlapping allow and deny tools', () => {
+    expect(() =>
+      parseHarness({
+        tenantId: 't1',
+        name: 'Agent',
+        role: 'Role',
+        soul: { truths: ['truth'], voice: 'voice' },
+        jobFunctions: ['do thing'],
+        tooling: { allow: ['sessions.list'], deny: ['sessions.list'] }
+      })
+    ).toThrowError(/both allow\/deny/);
+  });
 });
