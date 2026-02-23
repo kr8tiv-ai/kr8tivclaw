@@ -4,6 +4,8 @@ services:
     image: ghcr.io/openclaw/openclaw:stable
     container_name: openclaw-tenant-acme
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     environment:
       OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN}
       OPENCLAW_WORKSPACE: /workspace
@@ -19,6 +21,8 @@ services:
   agent-watchdog:
     image: curlimages/curl:8.10.1
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     environment:
       WATCHDOG_WEBHOOK_URL: https://example.com/watchdog
       WATCHDOG_INTERVAL_SECONDS: "60"
@@ -26,13 +30,14 @@ services:
     command: >-
       sh -c 'while true; do
         ts=$(date -u +%FT%TZ);
-        curl -fsS -X POST "$WATCHDOG_WEBHOOK_URL" -H "content-type: application/json"
-        -d "{\"tenantId\":\"$TENANT_ID\",\"timestamp\":\"$ts\",\"status\":\"alive\"}" || true;
+        payload=$(printf "{\"tenantId\":\"%s\",\"timestamp\":\"%s\",\"status\":\"alive\"}" "$TENANT_ID" "$ts");
+        curl -fsS -X POST "$WATCHDOG_WEBHOOK_URL" -H "content-type: application/json" -d "$payload" || true;
         sleep "$WATCHDOG_INTERVAL_SECONDS";
       done'
     depends_on:
       openclaw-gateway:
         condition: service_healthy
+
 
 volumes:
   tenant-tenant-acme-state:

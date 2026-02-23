@@ -1,6 +1,7 @@
 {
   "version": 1,
   "installRoot": "<workspace>/skills",
+  "installMode": "copy",
   "skills": [
     {
       "source": "./skills/concierge",

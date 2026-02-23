@@ -1,67 +1,76 @@
 # kr8tiv-claw distribution layer (for OpenClaw)
 
-This repository provides a **thin distribution layer** around upstream OpenClaw with minimal divergence:
+A thin, upstream-friendly distribution layer that compiles tenant harnesses into OpenClaw-ready workspace/config artifacts.
 
-- Harness compiler CLI (TypeScript) that reads `harness.yaml`
-- Workspace artifact generation (`AGENTS.md`, `SOUL.md`, `TOOLS.md`, `USER.md`, `HEARTBEAT.md`, optional `MEMORY.md`)
-- `openclaw.json` generation with secure defaults (pairing, mention gating, sandboxing, allow/deny lists)
-- Skill-pack manifest generation for workspace skills (`<workspace>/skills`)
-- Per-tenant Docker Compose template generator with persistent volumes + healthcheck
-- Optional `agent-watchdog` sidecar (simple webhook heartbeat pings)
-- Supermemory integration wrapper with tenant-scoped key/containerTag conventions
+## Goals
+
+- Keep **minimal upstream divergence** from OpenClaw runtime.
+- Put kr8tiv-specific behavior in **compiler/templates/modules**, not core forks.
+- Make mass tenant deployment easy with deterministic output files and compose templates.
+
+## Features
+
+- Harness compiler CLI (`harness.yaml` -> generated artifacts + rollout tasks)
+- Workspace artifact generation:
+  - `AGENTS.md`, `SOUL.md`, `TOOLS.md`, `USER.md`, `HEARTBEAT.md`, `TASKS.md`, `.env.example`, optional `MEMORY.md`
+- `openclaw.json` generation with secure defaults:
+  - DM pairing, mention gating
+  - non-main session sandboxing
+  - tool allow/deny policy controls
+- Skill-pack manifest generation for `<workspace>/skills`
+- Per-tenant docker-compose template generator:
+  - OpenClaw gateway container
+  - tenant state/workspace volumes
+  - healthcheck command: `node dist/index.js health --token $OPENCLAW_GATEWAY_TOKEN`
+  - optional `agent-watchdog` sidecar webhook pings
+- Supermemory integration module:
+  - scoped API key + containerTag model
+  - ingestion with `customId` dedupe conventions
+  - hybrid retrieval + threshold clamping
+  - user profile upsert support
 
 ## Module boundaries
 
-- `src/compiler/schema.ts` – harness schema and validation
-- `src/compiler/harness-compiler.ts` – compile harness into workspace/config artifacts
-- `src/compiler/compose-generator.ts` – docker-compose template generation
-- `src/templates/workspace.ts` – markdown template renderers
-- `src/supermemory/client.ts` – Supermemory wrapper (ingest/retrieve/profile)
+- `src/compiler/schema.ts` – harness schema + validation rules
+- `src/compiler/harness-compiler.ts` – compile/write config + workspace artifacts
+- `src/compiler/compose-generator.ts` – compose template output
+- `src/templates/workspace.ts` – markdown rendering templates
+- `src/supermemory/client.ts` – tenant-scoped Supermemory wrapper
 - `src/cli/harness.ts` – CLI entrypoint
 
-## Quick start
+## CLI usage
 
 ```bash
 npm install
 npm run build
-node dist/cli/harness.js --input ./tests/fixtures/harness.yaml --output ./out --compose-out ./out/docker-compose.yml
+
+# compile all artifacts + compose
+node dist/cli/harness.js --input ./harness.yaml --output ./out --compose-out ./out/docker-compose.yml
+
+# compose only
+node dist/cli/harness.js --input ./harness.yaml --compose-only --compose-out ./out/docker-compose.yml
+
+# validate only
+node dist/cli/harness.js --input ./harness.yaml --validate
+
+# print JSON schema shape
+node dist/cli/harness.js --schema
 ```
 
-## Harness schema behavior
+## Supermemory conventions
 
-`harness.yaml` is validated by Zod before any files are generated.
+- each tenant gets a scoped key + a distinct `containerTag`
+- ingestion metadata includes:
+  - `source: kr8tiv-claw`
+  - `dedupeBy: customId`
+- user profile customId convention:
+  - `profile:<userId>`
 
-Key secure defaults:
+## Tests
 
-- `channels.dmPairingRequired: true`
-- `channels.mentionGating: true`
-- `sandbox.nonMainSessionsIsolated: true`
-- explicit `tooling.allow` and `tooling.deny` support
-
-## Tenant compose generation
-
-Generated compose includes:
-
-- `openclaw-gateway` container (upstream image configurable from harness)
-- persistent tenant volumes (`tenant-<id>-state`, `tenant-<id>-workspace`)
-- healthcheck command: `node dist/index.js health --token $OPENCLAW_GATEWAY_TOKEN`
-- optional `agent-watchdog` sidecar (heartbeat webhook pings)
-
-## Supermemory integration notes
-
-`SupermemoryClient` is intentionally lightweight and container-friendly:
-
-- Scoped API key expected per tenant
-- `containerTag` required (tenant isolation boundary)
-- Ingestion uses `customId` + metadata dedupe convention
-- Retrieval uses `hybrid` strategy with configurable threshold
-- `upsertUserProfile` supported using `profile:<userId>` customId format
-
-## Testing
-
-- `tests/harness-golden.test.ts` – golden-file output tests
-- `tests/schema-validation.test.ts` – harness schema validation tests
-- `tests/supermemory.integration.stub.test.ts` – mock HTTP integration stubs
+- golden outputs: `tests/harness-golden.test.ts`
+- schema validation: `tests/schema-validation.test.ts` (required field coupling, safe IDs, allow/deny overlap)
+- Supermemory integration stubs (mock HTTP): `tests/supermemory.integration.stub.test.ts`
 
 Run:
 
@@ -69,12 +78,12 @@ Run:
 npm test
 ```
 
-## Upstream OpenClaw update strategy (minimal divergence)
+## Upstream-safe update workflow
 
-1. Keep runtime behavior in upstream OpenClaw image whenever possible.
-2. Keep kr8tiv features in templates/skills/config generation (this repo) rather than patching OpenClaw core.
-3. Review upstream OpenClaw release notes, then:
-   - bump default `openclaw.image` tag in harness examples/templates
-   - regenerate tenant outputs from harnesses
-   - run golden tests to detect accidental output drift
-4. Only patch OpenClaw core if a hard blocker exists; prefer plugin/skill/template adaptation first.
+1. Track upstream OpenClaw image tags (stable/beta/dev).
+2. Keep custom behavior in this distribution layer.
+3. Recompile tenant outputs from harness files after upstream bumps.
+4. Run golden tests to verify deterministic output and drift.
+5. Review generated `TASKS.md` for rollout gates and owner sign-off.
+6. Promote compose/environment changes tenant-by-tenant.
+7. Only patch OpenClaw core if blocked by an upstream gap.

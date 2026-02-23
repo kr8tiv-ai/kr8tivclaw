@@ -25,5 +25,8 @@
       "enabled": true,
       "containerTag": "tenant-acme"
     }
+  },
+  "distribution": {
+    "generatedBy": "kr8tiv-claw-harness-compiler"
   }
 }

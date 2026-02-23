@@ -24,3 +24,11 @@ export function renderMemoryMd(cfg: HarnessConfig): string | undefined {
   if (!cfg.memory.seed?.length) return undefined;
   return `# MEMORY\n\n${cfg.memory.seed.map((s) => `- ${s}`).join('\n')}\n`;
 }
+
+export function renderTasksMd(cfg: HarnessConfig): string {
+  return `# TASKS\n\n## Tenant Provisioning\n- [ ] Create tenant workspace and state volumes for \`${cfg.tenantId}\`.\n- [ ] Set \`OPENCLAW_GATEWAY_TOKEN\` in secret manager / environment.\n- [ ] Generate workspace artifacts from harness.\n\n## Security Baseline\n- [ ] Confirm DM pairing: ${cfg.channels.dmPairingRequired ? 'enabled' : 'disabled'}.\n- [ ] Confirm mention gating: ${cfg.channels.mentionGating ? 'enabled' : 'disabled'}.\n- [ ] Review tool allow/deny lists before go-live.\n- [ ] Verify non-main session sandboxing is ${cfg.sandbox.nonMainSessionsIsolated ? 'enabled' : 'disabled'}.\n\n## Messaging Channels\n- [ ] Configure WhatsApp integration (${cfg.channels.whatsapp ? 'enabled in harness' : 'disabled in harness'}).\n- [ ] Configure Telegram integration (${cfg.channels.telegram ? 'enabled in harness' : 'disabled in harness'}).\n\n## Supermemory\n- [ ] Create scoped API key per tenant.\n- [ ] Validate containerTag: ${cfg.memory.supermemory.containerTag ?? '(not configured)'}.\n- [ ] Validate ingestion + retrieval smoke test.\n\n## Operations\n- [ ] Deploy compose stack and confirm healthcheck passes.\n- [ ] Configure watchdog webhook (${cfg.watchdog.enabled ? 'enabled' : 'disabled'}).\n- [ ] Add monitor alerting for 5+ minute downtime.\n- [ ] Verify backup policy for tenant state/workspace volumes.\n\n## Upstream Update Procedure\n- [ ] Track OpenClaw ${cfg.updateRing} ring updates.\n- [ ] Regenerate artifacts on update.\n- [ ] Re-run golden tests before rollout.\n`;
+}
+
+export function renderEnvExample(cfg: HarnessConfig): string {
+  return `# Required\nOPENCLAW_GATEWAY_TOKEN=replace-with-strong-token\n\n# Optional Supermemory\nSUPERMEMORY_API_KEY=\nSUPERMEMORY_CONTAINER_TAG=${cfg.memory.supermemory.containerTag ?? cfg.tenantId}\n\n# Optional watchdog\nWATCHDOG_WEBHOOK_URL=${cfg.watchdog.webhookUrl ?? ''}\n`;
+}

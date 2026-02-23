@@ -23,6 +23,8 @@ describe('harness compiler golden outputs', () => {
       'TOOLS.md',
       'USER.md',
       'HEARTBEAT.md',
+      'TASKS.md',
+      '.env.example',
       'MEMORY.md',
       'openclaw.json',
       'skill-pack.manifest.json'
