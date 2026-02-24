@@ -13,7 +13,7 @@ export function renderToolsMd(cfg: HarnessConfig): string {
 }
 
 export function renderUserMd(cfg: HarnessConfig): string {
-  return `# USER\n\nTenant: ${cfg.tenantId}\nIdentity: ${cfg.name}\nRole: ${cfg.role}\nChannels: whatsapp=${cfg.channels.whatsapp}, telegram=${cfg.channels.telegram}\n`;
+  return `# USER\n\nTenant: ${cfg.tenantId}\nIdentity: ${cfg.name}\nRole: ${cfg.role}\nChannels: whatsapp=${cfg.channels.whatsapp}, telegram=${cfg.channels.telegram}\nMissionControl: required=${cfg.missionControl.required}, prompt_gate=${cfg.missionControl.enforcePromptGate}, privacy_mode=${cfg.missionControl.privacyMode}\n`;
 }
 
 export function renderHeartbeatMd(cfg: HarnessConfig): string {
@@ -26,9 +26,82 @@ export function renderMemoryMd(cfg: HarnessConfig): string | undefined {
 }
 
 export function renderTasksMd(cfg: HarnessConfig): string {
-  return `# TASKS\n\n## Tenant Provisioning\n- [ ] Create tenant workspace and state volumes for \`${cfg.tenantId}\`.\n- [ ] Set \`OPENCLAW_GATEWAY_TOKEN\` in secret manager / secret file.\n- [ ] Generate workspace artifacts from harness.\n\n## Security Baseline\n- [ ] Confirm DM pairing: ${cfg.channels.dmPairingRequired ? 'enabled' : 'disabled'}.\n- [ ] Confirm mention gating: ${cfg.channels.mentionGating ? 'enabled' : 'disabled'}.\n- [ ] Review tool allow/deny lists before go-live.\n- [ ] Verify non-main session sandboxing is ${cfg.sandbox.nonMainSessionsIsolated ? 'enabled' : 'disabled'}.\n\n## Messaging Channels\n- [ ] Configure WhatsApp integration (${cfg.channels.whatsapp ? 'enabled in harness' : 'disabled in harness'}).\n- [ ] Configure Telegram integration (${cfg.channels.telegram ? 'enabled in harness' : 'disabled in harness'}).\n- [ ] Ensure token injection uses runtime secret files, not committed env values.\n\n## Model Policy\n- [ ] Enforce primary model: ${cfg.modelPolicy.primary}\n- [ ] Confirm fallback list: ${cfg.modelPolicy.fallbacks.join(', ') || '(none)'}\n- [ ] Confirm runtime overrides are blocked: ${!cfg.modelPolicy.allowRuntimeOverride}\n- [ ] Validate fallback triggers: ${cfg.modelPolicy.fallbackOn.join(', ')}\n\n## Recovery Policy\n- [ ] Confirm recovery order: ${cfg.recovery.teamOrder.join(' -> ')}\n- [ ] Confirm single-owner recovery mode: ${cfg.recovery.singleOwner}\n- [ ] Confirm recovery cooldown seconds: ${cfg.recovery.cooldownSeconds}\n\n## Supermemory\n- [ ] Create scoped API key per tenant.\n- [ ] Validate containerTag: ${cfg.memory.supermemory.containerTag ?? '(not configured)'}.\n- [ ] Validate ingestion + retrieval smoke test.\n\n## Operations\n- [ ] Deploy compose stack and confirm healthcheck passes.\n- [ ] Configure watchdog webhook (${cfg.watchdog.enabled ? 'enabled' : 'disabled'}).\n- [ ] Add monitor alerting for 5+ minute downtime.\n- [ ] Verify backup policy for tenant state/workspace volumes.\n\n## Upstream Update Procedure\n- [ ] Track OpenClaw ${cfg.updateRing} ring updates.\n- [ ] Regenerate artifacts on update.\n- [ ] Re-run golden tests before rollout.\n`;
+  return `# TASKS
+
+## Tenant Provisioning
+- [ ] Create tenant workspace and state volumes for \`${cfg.tenantId}\`.
+- [ ] Set \`OPENCLAW_GATEWAY_TOKEN\` in secret manager / secret file.
+- [ ] Generate workspace artifacts from harness.
+
+## Security Baseline
+- [ ] Confirm DM pairing: ${cfg.channels.dmPairingRequired ? 'enabled' : 'disabled'}.
+- [ ] Confirm mention gating: ${cfg.channels.mentionGating ? 'enabled' : 'disabled'}.
+- [ ] Review tool allow/deny lists before go-live.
+- [ ] Verify non-main session sandboxing is ${cfg.sandbox.nonMainSessionsIsolated ? 'enabled' : 'disabled'}.
+
+## Mission Control Prompt Gate
+- [ ] Mission Control required: ${cfg.missionControl.required ? 'yes' : 'no'}.
+- [ ] Prompt gate enforcement: ${cfg.missionControl.enforcePromptGate ? 'enabled' : 'disabled'}.
+- [ ] Privacy mode: ${cfg.missionControl.privacyMode}.
+- [ ] Auto prompt training: ${cfg.missionControl.autoPromptTraining ? 'enabled' : 'disabled'}.
+
+## Messaging Channels
+- [ ] Configure WhatsApp integration (${cfg.channels.whatsapp ? 'enabled in harness' : 'disabled in harness'}).
+- [ ] Configure Telegram integration (${cfg.channels.telegram ? 'enabled in harness' : 'disabled in harness'}).
+- [ ] Ensure token injection uses runtime secret files, not committed env values.
+
+## Model Policy
+- [ ] Enforce primary model: ${cfg.modelPolicy.primary}
+- [ ] Confirm fallback list: ${cfg.modelPolicy.fallbacks.join(', ') || '(none)'}
+- [ ] Confirm runtime overrides are blocked: ${!cfg.modelPolicy.allowRuntimeOverride}
+- [ ] Validate fallback triggers: ${cfg.modelPolicy.fallbackOn.join(', ')}
+
+## Recovery Policy
+- [ ] Confirm recovery order: ${cfg.recovery.teamOrder.join(' -> ')}
+- [ ] Confirm single-owner recovery mode: ${cfg.recovery.singleOwner}
+- [ ] Confirm recovery cooldown seconds: ${cfg.recovery.cooldownSeconds}
+
+## Supermemory
+- [ ] Create scoped API key per tenant.
+- [ ] Validate containerTag: ${cfg.memory.supermemory.containerTag ?? '(not configured)'}.
+- [ ] Validate ingestion + retrieval smoke test.
+
+## Operations
+- [ ] Deploy compose stack and confirm healthcheck passes.
+- [ ] Configure watchdog webhook (${cfg.watchdog.enabled ? 'enabled' : 'disabled'}).
+- [ ] Add monitor alerting for 5+ minute downtime.
+- [ ] Verify backup policy for tenant state/workspace volumes.
+
+## Upstream Update Procedure
+- [ ] Track OpenClaw ${cfg.updateRing} ring updates.
+- [ ] Regenerate artifacts on update.
+- [ ] Re-run golden tests before rollout.
+`;
 }
 
 export function renderEnvExample(cfg: HarnessConfig): string {
-  return `# Required (inject at runtime, never commit real values)\nOPENCLAW_GATEWAY_TOKEN_FILE=/run/secrets/openclaw_gateway_token\n\n# Optional model policy overrides (prefer harness defaults)\nMODEL_PRIMARY=${cfg.modelPolicy.primary}\nMODEL_FALLBACKS=${cfg.modelPolicy.fallbacks.join(',')}\nMODEL_LOCK_ROUTES=${cfg.modelPolicy.lockRoutes}\nMODEL_ALLOW_RUNTIME_OVERRIDE=${cfg.modelPolicy.allowRuntimeOverride}\n\n# Optional Supermemory\nSUPERMEMORY_API_KEY_FILE=/run/secrets/supermemory_api_key\nSUPERMEMORY_CONTAINER_TAG=${cfg.memory.supermemory.containerTag ?? cfg.tenantId}\n\n# Optional Telegram\nTELEGRAM_BOT_TOKEN_FILE=/run/secrets/telegram_bot_token\n\n# Optional watchdog\nWATCHDOG_WEBHOOK_URL=${cfg.watchdog.webhookUrl ?? ''}\n`;
+  return `# Required (inject at runtime, never commit real values)
+OPENCLAW_GATEWAY_TOKEN_FILE=/run/secrets/openclaw_gateway_token
+MISSION_CONTROL_REQUIRED=${cfg.missionControl.required}
+MISSION_CONTROL_API_URL=${cfg.missionControl.apiUrl}
+PROMPT_GATE_ENABLED=${cfg.missionControl.enforcePromptGate}
+PROMPT_PRIVACY_MODE=${cfg.missionControl.privacyMode}
+AUTO_PROMPT_TRAINING=${cfg.missionControl.autoPromptTraining}
+
+# Optional model policy overrides (prefer harness defaults)
+MODEL_PRIMARY=${cfg.modelPolicy.primary}
+MODEL_FALLBACKS=${cfg.modelPolicy.fallbacks.join(',')}
+MODEL_LOCK_ROUTES=${cfg.modelPolicy.lockRoutes}
+MODEL_ALLOW_RUNTIME_OVERRIDE=${cfg.modelPolicy.allowRuntimeOverride}
+
+# Optional Supermemory
+SUPERMEMORY_API_KEY_FILE=/run/secrets/supermemory_api_key
+SUPERMEMORY_CONTAINER_TAG=${cfg.memory.supermemory.containerTag ?? cfg.tenantId}
+
+# Optional Telegram
+TELEGRAM_BOT_TOKEN_FILE=/run/secrets/telegram_bot_token
+
+# Optional watchdog
+WATCHDOG_WEBHOOK_URL=${cfg.watchdog.webhookUrl ?? ''}
+`;
 }

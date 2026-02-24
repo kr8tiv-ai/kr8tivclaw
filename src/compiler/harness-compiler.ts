@@ -45,6 +45,13 @@ export function buildOpenClawConfig(cfg: HarnessConfig): Record<string, unknown>
       retentionPolicy: cfg.memory.retentionPolicy,
       supermemory: cfg.memory.supermemory
     },
+    missionControl: {
+      required: cfg.missionControl.required,
+      apiUrl: cfg.missionControl.apiUrl,
+      enforcePromptGate: cfg.missionControl.enforcePromptGate,
+      privacyMode: cfg.missionControl.privacyMode,
+      autoPromptTraining: cfg.missionControl.autoPromptTraining
+    },
     modelPolicy: {
       primary: cfg.modelPolicy.primary,
       fallbacks: cfg.modelPolicy.fallbacks,

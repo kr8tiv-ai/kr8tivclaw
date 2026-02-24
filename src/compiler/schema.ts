@@ -48,6 +48,15 @@ export const HarnessSchema = z
       })
       .default({}),
     updateRing: z.enum(['stable', 'beta', 'dev']).default('stable'),
+    missionControl: z
+      .object({
+        required: z.boolean().default(true),
+        apiUrl: z.string().url().default('http://mission-control:8000/api/v1'),
+        enforcePromptGate: z.boolean().default(true),
+        privacyMode: z.enum(['tenant_isolated', 'org_shared']).default('tenant_isolated'),
+        autoPromptTraining: z.boolean().default(true)
+      })
+      .default({}),
     watchdog: z
       .object({
         enabled: z.boolean().default(false),
@@ -175,6 +184,16 @@ export function getHarnessJsonShape(): Record<string, unknown> {
         }
       },
       jobFunctions: { type: 'array', items: { type: 'string' }, minItems: 1 },
+      missionControl: {
+        type: 'object',
+        properties: {
+          required: { type: 'boolean' },
+          apiUrl: { type: 'string', format: 'uri' },
+          enforcePromptGate: { type: 'boolean' },
+          privacyMode: { type: 'string', enum: ['tenant_isolated', 'org_shared'] },
+          autoPromptTraining: { type: 'boolean' }
+        }
+      },
       modelPolicy: {
         type: 'object',
         properties: {
