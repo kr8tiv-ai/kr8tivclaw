@@ -45,6 +45,22 @@ export function buildOpenClawConfig(cfg: HarnessConfig): Record<string, unknown>
       retentionPolicy: cfg.memory.retentionPolicy,
       supermemory: cfg.memory.supermemory
     },
+    modelPolicy: {
+      primary: cfg.modelPolicy.primary,
+      fallbacks: cfg.modelPolicy.fallbacks,
+      lockRoutes: cfg.modelPolicy.lockRoutes,
+      allowRuntimeOverride: cfg.modelPolicy.allowRuntimeOverride,
+      fallbackOn: cfg.modelPolicy.fallbackOn
+    },
+    recovery: {
+      teamOrder: cfg.recovery.teamOrder,
+      singleOwner: cfg.recovery.singleOwner,
+      cooldownSeconds: cfg.recovery.cooldownSeconds
+    },
+    controlPlane: {
+      missionControlManaged: true,
+      allowSelfMutation: false
+    },
     distribution: {
       generatedBy: 'kr8tiv-claw-harness-compiler'
     }

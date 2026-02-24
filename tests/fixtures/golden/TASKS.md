@@ -2,7 +2,7 @@
 
 ## Tenant Provisioning
 - [ ] Create tenant workspace and state volumes for `tenant-acme`.
-- [ ] Set `OPENCLAW_GATEWAY_TOKEN` in secret manager / environment.
+- [ ] Set `OPENCLAW_GATEWAY_TOKEN` in secret manager / secret file.
 - [ ] Generate workspace artifacts from harness.
 
 ## Security Baseline
@@ -14,6 +14,18 @@
 ## Messaging Channels
 - [ ] Configure WhatsApp integration (enabled in harness).
 - [ ] Configure Telegram integration (enabled in harness).
+- [ ] Ensure token injection uses runtime secret files, not committed env values.
+
+## Model Policy
+- [ ] Enforce primary model: openai-codex/gpt-5.3-codex
+- [ ] Confirm fallback list: openai-codex/gpt-5-codex
+- [ ] Confirm runtime overrides are blocked: true
+- [ ] Validate fallback triggers: rate_limit, provider_cooldown
+
+## Recovery Policy
+- [ ] Confirm recovery order: FRIDAY -> ARSENAL -> JOCASTA -> EDITH
+- [ ] Confirm single-owner recovery mode: true
+- [ ] Confirm recovery cooldown seconds: 420
 
 ## Supermemory
 - [ ] Create scoped API key per tenant.
