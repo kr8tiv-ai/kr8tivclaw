@@ -16,6 +16,10 @@ describe('harness schema validation', () => {
     expect(parsed.modelPolicy.primary).toBe('openai-codex/gpt-5.3-codex');
     expect(parsed.modelPolicy.lockRoutes).toBe(true);
     expect(parsed.recovery.teamOrder).toEqual(['FRIDAY', 'ARSENAL', 'JOCASTA', 'EDITH']);
+    expect(parsed.controlPlane.missionControlUrl).toBe('http://mission-control:8000');
+    expect(parsed.controlPlane.telemetry.enabled).toBe(true);
+    expect(parsed.controlPlane.privacy.crossTenantLearning).toBe(false);
+    expect(parsed.controlPlane.privacy.crossUserLearning).toBe(false);
   });
 
   it('rejects invalid watchdog URL when enabled', () => {
@@ -104,5 +108,28 @@ describe('harness schema validation', () => {
         recovery: { teamOrder: ['FRIDAY', 'FRIDAY'], singleOwner: true, cooldownSeconds: 300 }
       })
     ).toThrowError(/must not contain duplicates/);
+  });
+
+  it('rejects invalid controlPlane.packRef format', () => {
+    expect(() =>
+      parseHarness({
+        tenantId: 't1',
+        name: 'Agent',
+        role: 'Role',
+        soul: { truths: ['truth'], voice: 'voice' },
+        jobFunctions: ['do thing'],
+        controlPlane: {
+          missionControlUrl: 'http://mission-control:8000',
+          missionControlTokenFile: '/run/secrets/mission_control_token',
+          tier: 'personal',
+          packRef: 'invalid-pack-ref',
+          telemetry: { enabled: true },
+          privacy: {
+            crossTenantLearning: false,
+            crossUserLearning: false
+          }
+        }
+      })
+    ).toThrowError(/packRef/);
   });
 });

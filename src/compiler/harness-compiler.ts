@@ -59,7 +59,18 @@ export function buildOpenClawConfig(cfg: HarnessConfig): Record<string, unknown>
     },
     controlPlane: {
       missionControlManaged: true,
-      allowSelfMutation: false
+      allowSelfMutation: false,
+      missionControlUrl: cfg.controlPlane.missionControlUrl,
+      missionControlTokenFile: cfg.controlPlane.missionControlTokenFile,
+      tier: cfg.controlPlane.tier,
+      packRef: cfg.controlPlane.packRef,
+      telemetry: {
+        enabled: cfg.controlPlane.telemetry.enabled
+      },
+      privacy: {
+        crossTenantLearning: cfg.controlPlane.privacy.crossTenantLearning,
+        crossUserLearning: cfg.controlPlane.privacy.crossUserLearning
+      }
     },
     distribution: {
       generatedBy: 'kr8tiv-claw-harness-compiler'

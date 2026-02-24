@@ -57,3 +57,13 @@ recovery:
     - EDITH
   singleOwner: true
   cooldownSeconds: 420
+controlPlane:
+  missionControlUrl: http://mission-control:8000
+  missionControlTokenFile: /run/secrets/mission_control_token
+  tier: enterprise
+  packRef: engineering-delivery-pack@2
+  telemetry:
+    enabled: true
+  privacy:
+    crossTenantLearning: false
+    crossUserLearning: false

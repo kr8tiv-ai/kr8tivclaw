@@ -50,7 +50,18 @@
   },
   "controlPlane": {
     "missionControlManaged": true,
-    "allowSelfMutation": false
+    "allowSelfMutation": false,
+    "missionControlUrl": "http://mission-control:8000",
+    "missionControlTokenFile": "/run/secrets/mission_control_token",
+    "tier": "enterprise",
+    "packRef": "engineering-delivery-pack@2",
+    "telemetry": {
+      "enabled": true
+    },
+    "privacy": {
+      "crossTenantLearning": false,
+      "crossUserLearning": false
+    }
   },
   "distribution": {
     "generatedBy": "kr8tiv-claw-harness-compiler"

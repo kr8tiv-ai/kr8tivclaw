@@ -25,6 +25,7 @@ A thin, upstream-friendly distribution layer that compiles tenant harnesses into
   - OpenClaw gateway container
   - tenant state/workspace volumes
   - healthcheck command: `node dist/index.js health --token $OPENCLAW_GATEWAY_TOKEN`
+  - Mission Control runtime env wiring + token file mount
   - optional `agent-watchdog` sidecar webhook pings
 - Supermemory integration module:
   - scoped API key + containerTag model
@@ -40,6 +41,48 @@ A thin, upstream-friendly distribution layer that compiles tenant harnesses into
 - `src/templates/workspace.ts` - markdown rendering templates
 - `src/supermemory/client.ts` - tenant-scoped Supermemory wrapper
 - `src/cli/harness.ts` - CLI entrypoint
+
+## Mission Control Contract
+
+`kr8tivclaw` is the distribution layer. It does not own runtime governance.
+
+- Mission Control (`kr8tiv-mission-control`) owns policy/prompt packs, telemetry scoring, promotion, rollback.
+- OpenClaw runtime executes with compiled contracts and reports telemetry upstream.
+- Generated artifacts lock self-mutation and require control-plane resolution before execution.
+
+### `controlPlane` harness block
+
+`harness.yaml` now supports:
+
+- `missionControlUrl`
+- `missionControlTokenFile`
+- `tier` (`personal|enterprise`)
+- `packRef` (`<pack-key>@<version>`)
+- `telemetry.enabled`
+- `privacy.crossTenantLearning` (default `false`)
+- `privacy.crossUserLearning` (default `false`)
+
+Compiler outputs now include this wiring in:
+
+- `openclaw.json`
+- `AGENTS.md` and `TOOLS.md` runtime contract sections
+- `.env.example`
+- generated compose env + token mount
+
+## Tiered lanes (single foundation)
+
+- Internal swarm lane: engineering delivery packs and deterministic done-gates
+- Personal lane: privacy-first, low-risk autonomy defaults
+- Enterprise lane: stricter gate posture with org-level governance
+
+All lanes share one contract and scale by policy, not divergent codepaths.
+
+## Iterative rollout
+
+1. Start with deterministic evaluator and pack resolution only
+2. Expand domain packs + tenant overrides
+3. Add canary promotion workflows and rollback drills
+4. Optionally enable local-only prompt challenger loops when budget policy changes
 
 ## CLI usage
 

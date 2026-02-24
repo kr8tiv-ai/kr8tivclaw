@@ -96,6 +96,38 @@ export const HarnessSchema = z
         teamOrder: ['FRIDAY', 'ARSENAL', 'JOCASTA', 'EDITH'],
         singleOwner: true,
         cooldownSeconds: 300
+      }),
+    controlPlane: z
+      .object({
+        missionControlUrl: z.string().url().default('http://mission-control:8000'),
+        missionControlTokenFile: z.string().min(1).default('/run/secrets/mission_control_token'),
+        tier: z.enum(['personal', 'enterprise']).default('personal'),
+        packRef: z.string().min(1).default('engineering-delivery-pack@1'),
+        telemetry: z
+          .object({
+            enabled: z.boolean().default(true)
+          })
+          .default({ enabled: true }),
+        privacy: z
+          .object({
+            crossTenantLearning: z.boolean().default(false),
+            crossUserLearning: z.boolean().default(false)
+          })
+          .default({
+            crossTenantLearning: false,
+            crossUserLearning: false
+          })
+      })
+      .default({
+        missionControlUrl: 'http://mission-control:8000',
+        missionControlTokenFile: '/run/secrets/mission_control_token',
+        tier: 'personal',
+        packRef: 'engineering-delivery-pack@1',
+        telemetry: { enabled: true },
+        privacy: {
+          crossTenantLearning: false,
+          crossUserLearning: false
+        }
       })
   })
   .superRefine((data, ctx) => {
@@ -149,6 +181,14 @@ export const HarnessSchema = z
         message: 'recovery.teamOrder must not contain duplicates'
       });
     }
+
+    if (!/^[a-z0-9][a-z0-9-]*@[0-9]+$/.test(data.controlPlane.packRef)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['controlPlane', 'packRef'],
+        message: 'controlPlane.packRef must be formatted as <pack-key>@<version>'
+      });
+    }
   });
 
 export type HarnessConfig = z.infer<typeof HarnessSchema>;
@@ -191,6 +231,28 @@ export function getHarnessJsonShape(): Record<string, unknown> {
           teamOrder: { type: 'array', items: { type: 'string' } },
           singleOwner: { type: 'boolean' },
           cooldownSeconds: { type: 'number' }
+        }
+      },
+      controlPlane: {
+        type: 'object',
+        properties: {
+          missionControlUrl: { type: 'string' },
+          missionControlTokenFile: { type: 'string' },
+          tier: { type: 'string', enum: ['personal', 'enterprise'] },
+          packRef: { type: 'string' },
+          telemetry: {
+            type: 'object',
+            properties: {
+              enabled: { type: 'boolean' }
+            }
+          },
+          privacy: {
+            type: 'object',
+            properties: {
+              crossTenantLearning: { type: 'boolean' },
+              crossUserLearning: { type: 'boolean' }
+            }
+          }
         }
       }
     }
