@@ -90,6 +90,7 @@ npm test
 We are standardizing `kr8tivclaw` so every tenant (individual or enterprise) can be compiled with a Mission Control quality gate and iterative prompt/context optimization.
 
 - Architecture + policy doc: [`docs/AUTO-IMPROVEMENT-CONTROL-PLANE.md`](docs/AUTO-IMPROVEMENT-CONTROL-PLANE.md)
+- Preserved strategy verdict + source set: [`docs/EVOLUTION-VERDICT-2026-02-24.md`](docs/EVOLUTION-VERDICT-2026-02-24.md)
 - Principle: no unmanaged static prompts in production
 - Default direction: route runtime through Mission Control so quality is measured, prompts are versioned, and rollbacks are deterministic
 
