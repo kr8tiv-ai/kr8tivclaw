@@ -85,6 +85,14 @@ npm test
 
 - See `docs/CHALLENGES-BACKLOG.md` for platform gaps we are actively baking into the distribution layer.
 
+## Team-wide Auto-Improvement Strategy (New)
+
+We are standardizing `kr8tivclaw` so every tenant (individual or enterprise) can be compiled with a Mission Control quality gate and iterative prompt/context optimization.
+
+- Architecture + policy doc: [`docs/AUTO-IMPROVEMENT-CONTROL-PLANE.md`](docs/AUTO-IMPROVEMENT-CONTROL-PLANE.md)
+- Principle: no unmanaged static prompts in production
+- Default direction: route runtime through Mission Control so quality is measured, prompts are versioned, and rollbacks are deterministic
+
 ## Upstream-safe update workflow
 
 1. Track upstream OpenClaw image tags (stable/beta/dev).
