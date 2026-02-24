@@ -7,8 +7,12 @@ import { generateTenantCompose } from '../src/compiler/compose-generator.js';
 const fixtureRoot = path.join(process.cwd(), 'tests/fixtures');
 const goldenRoot = path.join(fixtureRoot, 'golden');
 
+function normalizeEol(value: string): string {
+  return value.replace(/\r\n/g, '\n');
+}
+
 function readGolden(file: string): string {
-  return readFileSync(path.join(goldenRoot, file), 'utf8');
+  return normalizeEol(readFileSync(path.join(goldenRoot, file), 'utf8'));
 }
 
 describe('harness compiler golden outputs', () => {
@@ -29,12 +33,12 @@ describe('harness compiler golden outputs', () => {
       'openclaw.json',
       'skill-pack.manifest.json'
     ]) {
-      expect(byName.get(file)).toBe(readGolden(file));
+      expect(normalizeEol(byName.get(file) ?? '')).toBe(readGolden(file));
     }
   });
 
   it('matches compose template', async () => {
     const cfg = await loadHarnessFromYaml(path.join(fixtureRoot, 'harness.yaml'));
-    expect(generateTenantCompose(cfg)).toBe(readGolden('docker-compose.yml'));
+    expect(normalizeEol(generateTenantCompose(cfg))).toBe(readGolden('docker-compose.yml'));
   });
 });
