@@ -13,6 +13,9 @@ describe('harness schema validation', () => {
 
     expect(parsed.channels.dmPairingRequired).toBe(true);
     expect(parsed.sandbox.nonMainSessionsIsolated).toBe(true);
+    expect(parsed.modelPolicy.primary).toBe('openai-codex/gpt-5.3-codex');
+    expect(parsed.modelPolicy.lockRoutes).toBe(true);
+    expect(parsed.recovery.teamOrder).toEqual(['FRIDAY', 'ARSENAL', 'JOCASTA', 'EDITH']);
   });
 
   it('rejects invalid watchdog URL when enabled', () => {
@@ -88,5 +91,18 @@ describe('harness schema validation', () => {
         memory: { supermemory: { enabled: true, containerTag: 'Bad Tag' } }
       })
     ).toThrowError(/kebab-case/);
+  });
+
+  it('rejects duplicate recovery team order entries', () => {
+    expect(() =>
+      parseHarness({
+        tenantId: 't1',
+        name: 'Agent',
+        role: 'Role',
+        soul: { truths: ['truth'], voice: 'voice' },
+        jobFunctions: ['do thing'],
+        recovery: { teamOrder: ['FRIDAY', 'FRIDAY'], singleOwner: true, cooldownSeconds: 300 }
+      })
+    ).toThrowError(/must not contain duplicates/);
   });
 });

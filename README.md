@@ -1,12 +1,13 @@
-# kr8tiv-claw distribution layer (for OpenClaw)
+﻿# kr8tiv-claw distribution layer (for OpenClaw)
 
-A thin, upstream-friendly distribution layer that compiles tenant harnesses into OpenClaw-ready workspace/config artifacts.
+A thin, upstream-friendly distribution layer that compiles tenant harnesses into OpenClaw-ready workspace and config artifacts.
 
 ## Goals
 
-- Keep **minimal upstream divergence** from OpenClaw runtime.
-- Put kr8tiv-specific behavior in **compiler/templates/modules**, not core forks.
-- Make mass tenant deployment easy with deterministic output files and compose templates.
+- Keep minimal upstream divergence from OpenClaw runtime.
+- Put KR8TIV-specific behavior in compiler/templates/modules, not core forks.
+- Make mass tenant deployment deterministic and repeatable.
+- Keep generated artifacts secret-safe by design (runtime injection, no key commits).
 
 ## Features
 
@@ -14,9 +15,11 @@ A thin, upstream-friendly distribution layer that compiles tenant harnesses into
 - Workspace artifact generation:
   - `AGENTS.md`, `SOUL.md`, `TOOLS.md`, `USER.md`, `HEARTBEAT.md`, `TASKS.md`, `.env.example`, optional `MEMORY.md`
 - `openclaw.json` generation with secure defaults:
-  - DM pairing, mention gating
+  - DM pairing and mention gating
   - non-main session sandboxing
   - tool allow/deny policy controls
+  - model route lock and fallback trigger policy
+  - deterministic single-owner recovery order
 - Skill-pack manifest generation for `<workspace>/skills`
 - Per-tenant docker-compose template generator:
   - OpenClaw gateway container
@@ -31,12 +34,12 @@ A thin, upstream-friendly distribution layer that compiles tenant harnesses into
 
 ## Module boundaries
 
-- `src/compiler/schema.ts` – harness schema + validation rules
-- `src/compiler/harness-compiler.ts` – compile/write config + workspace artifacts
-- `src/compiler/compose-generator.ts` – compose template output
-- `src/templates/workspace.ts` – markdown rendering templates
-- `src/supermemory/client.ts` – tenant-scoped Supermemory wrapper
-- `src/cli/harness.ts` – CLI entrypoint
+- `src/compiler/schema.ts` - harness schema + validation rules
+- `src/compiler/harness-compiler.ts` - compile/write config + workspace artifacts
+- `src/compiler/compose-generator.ts` - compose template output
+- `src/templates/workspace.ts` - markdown rendering templates
+- `src/supermemory/client.ts` - tenant-scoped Supermemory wrapper
+- `src/cli/harness.ts` - CLI entrypoint
 
 ## CLI usage
 
@@ -59,7 +62,7 @@ node dist/cli/harness.js --schema
 
 ## Supermemory conventions
 
-- each tenant gets a scoped key + a distinct `containerTag`
+- each tenant gets a scoped key and a distinct `containerTag`
 - ingestion metadata includes:
   - `source: kr8tiv-claw`
   - `dedupeBy: customId`
@@ -69,7 +72,7 @@ node dist/cli/harness.js --schema
 ## Tests
 
 - golden outputs: `tests/harness-golden.test.ts`
-- schema validation: `tests/schema-validation.test.ts` (required field coupling, safe IDs, allow/deny overlap)
+- schema validation: `tests/schema-validation.test.ts`
 - Supermemory integration stubs (mock HTTP): `tests/supermemory.integration.stub.test.ts`
 
 Run:
@@ -80,7 +83,7 @@ npm test
 
 ## KR8TIV-specific challenge backlog
 
-- See [`docs/CHALLENGES-BACKLOG.md`](docs/CHALLENGES-BACKLOG.md) for platform gaps we are actively baking into the distribution layer.
+- See `docs/CHALLENGES-BACKLOG.md` for platform gaps we are actively baking into the distribution layer.
 
 ## Upstream-safe update workflow
 

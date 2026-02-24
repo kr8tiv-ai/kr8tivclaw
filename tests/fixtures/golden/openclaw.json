@@ -26,6 +26,32 @@
       "containerTag": "tenant-acme"
     }
   },
+  "modelPolicy": {
+    "primary": "openai-codex/gpt-5.3-codex",
+    "fallbacks": [
+      "openai-codex/gpt-5-codex"
+    ],
+    "lockRoutes": true,
+    "allowRuntimeOverride": false,
+    "fallbackOn": [
+      "rate_limit",
+      "provider_cooldown"
+    ]
+  },
+  "recovery": {
+    "teamOrder": [
+      "FRIDAY",
+      "ARSENAL",
+      "JOCASTA",
+      "EDITH"
+    ],
+    "singleOwner": true,
+    "cooldownSeconds": 420
+  },
+  "controlPlane": {
+    "missionControlManaged": true,
+    "allowSelfMutation": false
+  },
   "distribution": {
     "generatedBy": "kr8tiv-claw-harness-compiler"
   }

@@ -40,3 +40,20 @@ skills:
     - ./skills/ops
 openclaw:
   image: ghcr.io/openclaw/openclaw:stable
+modelPolicy:
+  primary: openai-codex/gpt-5.3-codex
+  fallbacks:
+    - openai-codex/gpt-5-codex
+  lockRoutes: true
+  allowRuntimeOverride: false
+  fallbackOn:
+    - rate_limit
+    - provider_cooldown
+recovery:
+  teamOrder:
+    - FRIDAY
+    - ARSENAL
+    - JOCASTA
+    - EDITH
+  singleOwner: true
+  cooldownSeconds: 420

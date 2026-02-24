@@ -64,7 +64,39 @@ export const HarnessSchema = z
       .object({
         image: z.string().min(1).default('ghcr.io/openclaw/openclaw:latest')
       })
-      .default({ image: 'ghcr.io/openclaw/openclaw:latest' })
+      .default({ image: 'ghcr.io/openclaw/openclaw:latest' }),
+    modelPolicy: z
+      .object({
+        primary: z.string().min(1).default('openai-codex/gpt-5.3-codex'),
+        fallbacks: z.array(z.string().min(1)).default([]),
+        lockRoutes: z.boolean().default(true),
+        allowRuntimeOverride: z.boolean().default(false),
+        fallbackOn: z
+          .array(
+            z.enum(['rate_limit', 'provider_cooldown', 'billing_disabled', 'auth_profile_unavailable'])
+          )
+          .default(['rate_limit', 'provider_cooldown', 'billing_disabled', 'auth_profile_unavailable'])
+      })
+      .default({
+        primary: 'openai-codex/gpt-5.3-codex',
+        fallbacks: [],
+        lockRoutes: true,
+        allowRuntimeOverride: false,
+        fallbackOn: ['rate_limit', 'provider_cooldown', 'billing_disabled', 'auth_profile_unavailable']
+      }),
+    recovery: z
+      .object({
+        teamOrder: z
+          .array(z.enum(['FRIDAY', 'ARSENAL', 'JOCASTA', 'EDITH']))
+          .default(['FRIDAY', 'ARSENAL', 'JOCASTA', 'EDITH']),
+        singleOwner: z.boolean().default(true),
+        cooldownSeconds: z.number().int().min(30).default(300)
+      })
+      .default({
+        teamOrder: ['FRIDAY', 'ARSENAL', 'JOCASTA', 'EDITH'],
+        singleOwner: true,
+        cooldownSeconds: 300
+      })
   })
   .superRefine((data, ctx) => {
     if (data.watchdog.enabled && !data.watchdog.webhookUrl) {
@@ -100,6 +132,23 @@ export const HarnessSchema = z
         message: 'containerTag must be kebab-case safe'
       });
     }
+
+    if (!data.recovery.teamOrder.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['recovery', 'teamOrder'],
+        message: 'recovery.teamOrder must include at least one agent'
+      });
+    }
+
+    const recoveryOrder = new Set(data.recovery.teamOrder);
+    if (recoveryOrder.size !== data.recovery.teamOrder.length) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['recovery', 'teamOrder'],
+        message: 'recovery.teamOrder must not contain duplicates'
+      });
+    }
   });
 
 export type HarnessConfig = z.infer<typeof HarnessSchema>;
@@ -125,7 +174,25 @@ export function getHarnessJsonShape(): Record<string, unknown> {
           boundaries: { type: 'array', items: { type: 'string' } }
         }
       },
-      jobFunctions: { type: 'array', items: { type: 'string' }, minItems: 1 }
+      jobFunctions: { type: 'array', items: { type: 'string' }, minItems: 1 },
+      modelPolicy: {
+        type: 'object',
+        properties: {
+          primary: { type: 'string' },
+          fallbacks: { type: 'array', items: { type: 'string' } },
+          lockRoutes: { type: 'boolean' },
+          allowRuntimeOverride: { type: 'boolean' },
+          fallbackOn: { type: 'array', items: { type: 'string' } }
+        }
+      },
+      recovery: {
+        type: 'object',
+        properties: {
+          teamOrder: { type: 'array', items: { type: 'string' } },
+          singleOwner: { type: 'boolean' },
+          cooldownSeconds: { type: 'number' }
+        }
+      }
     }
   };
 }
