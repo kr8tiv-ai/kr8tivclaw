@@ -45,19 +45,26 @@ export function buildOpenClawConfig(cfg: HarnessConfig): Record<string, unknown>
       retentionPolicy: cfg.memory.retentionPolicy,
       supermemory: cfg.memory.supermemory
     },
-    missionControl: {
-      required: cfg.missionControl.required,
-      apiUrl: cfg.missionControl.apiUrl,
-      enforcePromptGate: cfg.missionControl.enforcePromptGate,
-      privacyMode: cfg.missionControl.privacyMode,
-      autoPromptTraining: cfg.missionControl.autoPromptTraining
-    },
     modelPolicy: {
       primary: cfg.modelPolicy.primary,
       fallbacks: cfg.modelPolicy.fallbacks,
       lockRoutes: cfg.modelPolicy.lockRoutes,
       allowRuntimeOverride: cfg.modelPolicy.allowRuntimeOverride,
       fallbackOn: cfg.modelPolicy.fallbackOn
+    },
+    reasoningPolicy: {
+      default: cfg.reasoningPolicy.default,
+      fallbackBehavior: cfg.reasoningPolicy.fallbackBehavior
+    },
+    persona: {
+      presetRef: cfg.persona.presetRef,
+      mode: cfg.persona.mode,
+      orchestratorEnabled: cfg.persona.orchestratorEnabled
+    },
+    onboarding: {
+      recommendationEnabled: cfg.onboarding.recommendationEnabled,
+      personalizedDefaults: cfg.onboarding.personalizedDefaults,
+      autoNotebooklmPrompt: cfg.onboarding.autoNotebooklmPrompt
     },
     recovery: {
       teamOrder: cfg.recovery.teamOrder,
@@ -66,7 +73,18 @@ export function buildOpenClawConfig(cfg: HarnessConfig): Record<string, unknown>
     },
     controlPlane: {
       missionControlManaged: true,
-      allowSelfMutation: false
+      allowSelfMutation: false,
+      missionControlUrl: cfg.controlPlane.missionControlUrl,
+      missionControlTokenFile: cfg.controlPlane.missionControlTokenFile,
+      tier: cfg.controlPlane.tier,
+      packRef: cfg.controlPlane.packRef,
+      telemetry: {
+        enabled: cfg.controlPlane.telemetry.enabled
+      },
+      privacy: {
+        crossTenantLearning: cfg.controlPlane.privacy.crossTenantLearning,
+        crossUserLearning: cfg.controlPlane.privacy.crossUserLearning
+      }
     },
     distribution: {
       generatedBy: 'kr8tiv-claw-harness-compiler'

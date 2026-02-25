@@ -48,15 +48,6 @@ export const HarnessSchema = z
       })
       .default({}),
     updateRing: z.enum(['stable', 'beta', 'dev']).default('stable'),
-    missionControl: z
-      .object({
-        required: z.boolean().default(true),
-        apiUrl: z.string().url().default('http://mission-control:8000/api/v1'),
-        enforcePromptGate: z.boolean().default(true),
-        privacyMode: z.enum(['tenant_isolated', 'org_shared']).default('tenant_isolated'),
-        autoPromptTraining: z.boolean().default(true)
-      })
-      .default({}),
     watchdog: z
       .object({
         enabled: z.boolean().default(false),
@@ -93,6 +84,41 @@ export const HarnessSchema = z
         allowRuntimeOverride: false,
         fallbackOn: ['rate_limit', 'provider_cooldown', 'billing_disabled', 'auth_profile_unavailable']
       }),
+    reasoningPolicy: z
+      .object({
+        default: z.enum(['max', 'high', 'normal', 'off']).default('max'),
+        fallbackBehavior: z
+          .enum(['highest_or_model_default', 'model_default'])
+          .default('highest_or_model_default')
+      })
+      .default({
+        default: 'max',
+        fallbackBehavior: 'highest_or_model_default'
+      }),
+    persona: z
+      .object({
+        presetRef: z.string().min(1).default('default-team'),
+        mode: z.enum(['team', 'individual']).default('team'),
+        orchestratorEnabled: z.boolean().default(true)
+      })
+      .default({
+        presetRef: 'default-team',
+        mode: 'team',
+        orchestratorEnabled: true
+      }),
+    onboarding: z
+      .object({
+        recommendationEnabled: z.boolean().default(true),
+        personalizedDefaults: z
+          .array(z.enum(['voice', 'uplay_chromium', 'mission_control_tasks', 'notebooklm']))
+          .default(['voice', 'uplay_chromium']),
+        autoNotebooklmPrompt: z.boolean().default(true)
+      })
+      .default({
+        recommendationEnabled: true,
+        personalizedDefaults: ['voice', 'uplay_chromium'],
+        autoNotebooklmPrompt: true
+      }),
     recovery: z
       .object({
         teamOrder: z
@@ -105,6 +131,38 @@ export const HarnessSchema = z
         teamOrder: ['FRIDAY', 'ARSENAL', 'JOCASTA', 'EDITH'],
         singleOwner: true,
         cooldownSeconds: 300
+      }),
+    controlPlane: z
+      .object({
+        missionControlUrl: z.string().url().default('http://mission-control:8000'),
+        missionControlTokenFile: z.string().min(1).default('/run/secrets/mission_control_token'),
+        tier: z.enum(['personal', 'enterprise']).default('personal'),
+        packRef: z.string().min(1).default('engineering-delivery-pack@1'),
+        telemetry: z
+          .object({
+            enabled: z.boolean().default(true)
+          })
+          .default({ enabled: true }),
+        privacy: z
+          .object({
+            crossTenantLearning: z.boolean().default(false),
+            crossUserLearning: z.boolean().default(false)
+          })
+          .default({
+            crossTenantLearning: false,
+            crossUserLearning: false
+          })
+      })
+      .default({
+        missionControlUrl: 'http://mission-control:8000',
+        missionControlTokenFile: '/run/secrets/mission_control_token',
+        tier: 'personal',
+        packRef: 'engineering-delivery-pack@1',
+        telemetry: { enabled: true },
+        privacy: {
+          crossTenantLearning: false,
+          crossUserLearning: false
+        }
       })
   })
   .superRefine((data, ctx) => {
@@ -158,6 +216,22 @@ export const HarnessSchema = z
         message: 'recovery.teamOrder must not contain duplicates'
       });
     }
+
+    if (!/^[a-z0-9][a-z0-9-]*@[0-9]+$/.test(data.controlPlane.packRef)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['controlPlane', 'packRef'],
+        message: 'controlPlane.packRef must be formatted as <pack-key>@<version>'
+      });
+    }
+
+    if (data.persona.mode === 'individual' && data.persona.orchestratorEnabled) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['persona', 'orchestratorEnabled'],
+        message: 'persona.orchestratorEnabled must be false when persona.mode is individual'
+      });
+    }
   });
 
 export type HarnessConfig = z.infer<typeof HarnessSchema>;
@@ -184,16 +258,6 @@ export function getHarnessJsonShape(): Record<string, unknown> {
         }
       },
       jobFunctions: { type: 'array', items: { type: 'string' }, minItems: 1 },
-      missionControl: {
-        type: 'object',
-        properties: {
-          required: { type: 'boolean' },
-          apiUrl: { type: 'string', format: 'uri' },
-          enforcePromptGate: { type: 'boolean' },
-          privacyMode: { type: 'string', enum: ['tenant_isolated', 'org_shared'] },
-          autoPromptTraining: { type: 'boolean' }
-        }
-      },
       modelPolicy: {
         type: 'object',
         properties: {
@@ -204,12 +268,57 @@ export function getHarnessJsonShape(): Record<string, unknown> {
           fallbackOn: { type: 'array', items: { type: 'string' } }
         }
       },
+      reasoningPolicy: {
+        type: 'object',
+        properties: {
+          default: { type: 'string', enum: ['max', 'high', 'normal', 'off'] },
+          fallbackBehavior: { type: 'string', enum: ['highest_or_model_default', 'model_default'] }
+        }
+      },
+      persona: {
+        type: 'object',
+        properties: {
+          presetRef: { type: 'string' },
+          mode: { type: 'string', enum: ['team', 'individual'] },
+          orchestratorEnabled: { type: 'boolean' }
+        }
+      },
+      onboarding: {
+        type: 'object',
+        properties: {
+          recommendationEnabled: { type: 'boolean' },
+          personalizedDefaults: { type: 'array', items: { type: 'string' } },
+          autoNotebooklmPrompt: { type: 'boolean' }
+        }
+      },
       recovery: {
         type: 'object',
         properties: {
           teamOrder: { type: 'array', items: { type: 'string' } },
           singleOwner: { type: 'boolean' },
           cooldownSeconds: { type: 'number' }
+        }
+      },
+      controlPlane: {
+        type: 'object',
+        properties: {
+          missionControlUrl: { type: 'string' },
+          missionControlTokenFile: { type: 'string' },
+          tier: { type: 'string', enum: ['personal', 'enterprise'] },
+          packRef: { type: 'string' },
+          telemetry: {
+            type: 'object',
+            properties: {
+              enabled: { type: 'boolean' }
+            }
+          },
+          privacy: {
+            type: 'object',
+            properties: {
+              crossTenantLearning: { type: 'boolean' },
+              crossUserLearning: { type: 'boolean' }
+            }
+          }
         }
       }
     }

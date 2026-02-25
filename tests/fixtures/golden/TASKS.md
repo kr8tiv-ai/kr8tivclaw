@@ -3,6 +3,7 @@
 ## Tenant Provisioning
 - [ ] Create tenant workspace and state volumes for `tenant-acme`.
 - [ ] Set `OPENCLAW_GATEWAY_TOKEN` in secret manager / secret file.
+- [ ] Set Mission Control token file at `/run/secrets/mission_control_token`.
 - [ ] Generate workspace artifacts from harness.
 
 ## Security Baseline
@@ -22,6 +23,13 @@
 - [ ] Confirm runtime overrides are blocked: true
 - [ ] Validate fallback triggers: rate_limit, provider_cooldown
 
+## Control Plane Policy
+- [ ] Confirm Mission Control URL: http://mission-control:8000
+- [ ] Confirm tier: enterprise
+- [ ] Confirm pack ref: engineering-delivery-pack@2
+- [ ] Confirm telemetry enabled: true
+- [ ] Confirm privacy flags: tenant=false, user=false
+
 ## Recovery Policy
 - [ ] Confirm recovery order: FRIDAY -> ARSENAL -> JOCASTA -> EDITH
 - [ ] Confirm single-owner recovery mode: true
@@ -35,6 +43,8 @@
 ## Operations
 - [ ] Deploy compose stack and confirm healthcheck passes.
 - [ ] Configure watchdog webhook (enabled).
+- [ ] Verify runtime can resolve champion pack via Mission Control.
+- [ ] Verify runtime telemetry reaches Mission Control for each run.
 - [ ] Add monitor alerting for 5+ minute downtime.
 - [ ] Verify backup policy for tenant state/workspace volumes.
 

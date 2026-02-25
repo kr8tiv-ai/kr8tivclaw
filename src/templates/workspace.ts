@@ -1,7 +1,7 @@
 import type { HarnessConfig } from '../compiler/schema.js';
 
 export function renderAgentsMd(cfg: HarnessConfig): string {
-  return `# AGENTS\n\nYou are ${cfg.name}, ${cfg.role}.\n\n## Job Functions\n${cfg.jobFunctions.map((f) => `- ${f}`).join('\n')}\n\n## Safety Boundaries\n${cfg.soul.boundaries.map((b) => `- ${b}`).join('\n') || '- Follow default OpenClaw safety model.'}\n\n## Model Route Lock\n- primary: ${cfg.modelPolicy.primary}\n- fallbacks: ${cfg.modelPolicy.fallbacks.join(', ') || '(none)'}\n- lock_routes: ${cfg.modelPolicy.lockRoutes}\n- runtime_override_allowed: ${cfg.modelPolicy.allowRuntimeOverride}\n\n## Secrets Handling\n- Never write API keys, bot tokens, auth blobs, or OAuth data into workspace files, chat, or task comments.\n- Use runtime secret injection only (desktop/VPS secret manager or mounted secret files).\n\n## Operator Doctrine\n- "I can't" is not acceptable during execution.\n- If blocked, research alternatives and test them.\n- Before declaring impossible: evaluate at least 3 approaches, try at least 2, capture exact failures.\n- Deliver outcomes with evidence.\n\n## Recovery Delegation\n- Recovery order: ${cfg.recovery.teamOrder.join(' -> ')}\n- single_owner: ${cfg.recovery.singleOwner}\n- If you are not the elected owner for an outage, do not perform competing recovery actions.\n`;
+  return `# AGENTS\n\nYou are ${cfg.name}, ${cfg.role}.\n\n## Job Functions\n${cfg.jobFunctions.map((f) => `- ${f}`).join('\n')}\n\n## Safety Boundaries\n${cfg.soul.boundaries.map((b) => `- ${b}`).join('\n') || '- Follow default OpenClaw safety model.'}\n\n## Model Route Lock\n- primary: ${cfg.modelPolicy.primary}\n- fallbacks: ${cfg.modelPolicy.fallbacks.join(', ') || '(none)'}\n- lock_routes: ${cfg.modelPolicy.lockRoutes}\n- runtime_override_allowed: ${cfg.modelPolicy.allowRuntimeOverride}\n\n## Reasoning + Persona Policy\n- reasoning_default: ${cfg.reasoningPolicy.default}\n- reasoning_fallback_behavior: ${cfg.reasoningPolicy.fallbackBehavior}\n- persona_preset_ref: ${cfg.persona.presetRef}\n- persona_mode: ${cfg.persona.mode}\n- orchestrator_enabled: ${cfg.persona.orchestratorEnabled}\n- onboarding_recommendation_enabled: ${cfg.onboarding.recommendationEnabled}\n- onboarding_personalized_defaults: ${cfg.onboarding.personalizedDefaults.join(', ') || '(none)'}\n\n## Mission Control Runtime Contract\n- mission_control_url: ${cfg.controlPlane.missionControlUrl}\n- tier: ${cfg.controlPlane.tier}\n- pack_ref: ${cfg.controlPlane.packRef}\n- telemetry_enabled: ${cfg.controlPlane.telemetry.enabled}\n- mutation_lock: true\n- runtime must resolve champion pack from Mission Control before task execution.\n- runtime must report run telemetry to Mission Control after each task run.\n\n## Secrets Handling\n- Never write API keys, bot tokens, auth blobs, or OAuth data into workspace files, chat, or task comments.\n- Use runtime secret injection only (desktop/VPS secret manager or mounted secret files).\n\n## Operator Doctrine\n- "I can't" is not acceptable during execution.\n- If blocked, research alternatives and test them.\n- Before declaring impossible: evaluate at least 3 approaches, try at least 2, capture exact failures.\n- Deliver outcomes with evidence.\n\n## Recovery Delegation\n- Recovery order: ${cfg.recovery.teamOrder.join(' -> ')}\n- single_owner: ${cfg.recovery.singleOwner}\n- If you are not the elected owner for an outage, do not perform competing recovery actions.\n`;
 }
 
 export function renderSoulMd(cfg: HarnessConfig): string {
@@ -9,11 +9,11 @@ export function renderSoulMd(cfg: HarnessConfig): string {
 }
 
 export function renderToolsMd(cfg: HarnessConfig): string {
-  return `# TOOLS\n\n## Allow\n${cfg.tooling.allow.map((t) => `- ${t}`).join('\n') || '- (none)'}\n\n## Deny\n${cfg.tooling.deny.map((t) => `- ${t}`).join('\n') || '- (none)'}\n\n## Elevated Mode\n- ${cfg.tooling.elevatedMode ? 'enabled' : 'disabled'}\n`;
+  return `# TOOLS\n\n## Allow\n${cfg.tooling.allow.map((t) => `- ${t}`).join('\n') || '- (none)'}\n\n## Deny\n${cfg.tooling.deny.map((t) => `- ${t}`).join('\n') || '- (none)'}\n\n## Elevated Mode\n- ${cfg.tooling.elevatedMode ? 'enabled' : 'disabled'}\n\n## Mission Control Hooks\n- resolve_pack_endpoint: ${cfg.controlPlane.missionControlUrl}/api/v1/runtime/packs/resolve\n- telemetry_endpoint: ${cfg.controlPlane.missionControlUrl}/api/v1/runtime/runs\n- token_file: ${cfg.controlPlane.missionControlTokenFile}\n- cross_tenant_learning: ${cfg.controlPlane.privacy.crossTenantLearning}\n- cross_user_learning: ${cfg.controlPlane.privacy.crossUserLearning}\n`;
 }
 
 export function renderUserMd(cfg: HarnessConfig): string {
-  return `# USER\n\nTenant: ${cfg.tenantId}\nIdentity: ${cfg.name}\nRole: ${cfg.role}\nChannels: whatsapp=${cfg.channels.whatsapp}, telegram=${cfg.channels.telegram}\nMissionControl: required=${cfg.missionControl.required}, prompt_gate=${cfg.missionControl.enforcePromptGate}, privacy_mode=${cfg.missionControl.privacyMode}\n`;
+  return `# USER\n\nTenant: ${cfg.tenantId}\nIdentity: ${cfg.name}\nRole: ${cfg.role}\nChannels: whatsapp=${cfg.channels.whatsapp}, telegram=${cfg.channels.telegram}\n`;
 }
 
 export function renderHeartbeatMd(cfg: HarnessConfig): string {
@@ -26,82 +26,9 @@ export function renderMemoryMd(cfg: HarnessConfig): string | undefined {
 }
 
 export function renderTasksMd(cfg: HarnessConfig): string {
-  return `# TASKS
-
-## Tenant Provisioning
-- [ ] Create tenant workspace and state volumes for \`${cfg.tenantId}\`.
-- [ ] Set \`OPENCLAW_GATEWAY_TOKEN\` in secret manager / secret file.
-- [ ] Generate workspace artifacts from harness.
-
-## Security Baseline
-- [ ] Confirm DM pairing: ${cfg.channels.dmPairingRequired ? 'enabled' : 'disabled'}.
-- [ ] Confirm mention gating: ${cfg.channels.mentionGating ? 'enabled' : 'disabled'}.
-- [ ] Review tool allow/deny lists before go-live.
-- [ ] Verify non-main session sandboxing is ${cfg.sandbox.nonMainSessionsIsolated ? 'enabled' : 'disabled'}.
-
-## Mission Control Prompt Gate
-- [ ] Mission Control required: ${cfg.missionControl.required ? 'yes' : 'no'}.
-- [ ] Prompt gate enforcement: ${cfg.missionControl.enforcePromptGate ? 'enabled' : 'disabled'}.
-- [ ] Privacy mode: ${cfg.missionControl.privacyMode}.
-- [ ] Auto prompt training: ${cfg.missionControl.autoPromptTraining ? 'enabled' : 'disabled'}.
-
-## Messaging Channels
-- [ ] Configure WhatsApp integration (${cfg.channels.whatsapp ? 'enabled in harness' : 'disabled in harness'}).
-- [ ] Configure Telegram integration (${cfg.channels.telegram ? 'enabled in harness' : 'disabled in harness'}).
-- [ ] Ensure token injection uses runtime secret files, not committed env values.
-
-## Model Policy
-- [ ] Enforce primary model: ${cfg.modelPolicy.primary}
-- [ ] Confirm fallback list: ${cfg.modelPolicy.fallbacks.join(', ') || '(none)'}
-- [ ] Confirm runtime overrides are blocked: ${!cfg.modelPolicy.allowRuntimeOverride}
-- [ ] Validate fallback triggers: ${cfg.modelPolicy.fallbackOn.join(', ')}
-
-## Recovery Policy
-- [ ] Confirm recovery order: ${cfg.recovery.teamOrder.join(' -> ')}
-- [ ] Confirm single-owner recovery mode: ${cfg.recovery.singleOwner}
-- [ ] Confirm recovery cooldown seconds: ${cfg.recovery.cooldownSeconds}
-
-## Supermemory
-- [ ] Create scoped API key per tenant.
-- [ ] Validate containerTag: ${cfg.memory.supermemory.containerTag ?? '(not configured)'}.
-- [ ] Validate ingestion + retrieval smoke test.
-
-## Operations
-- [ ] Deploy compose stack and confirm healthcheck passes.
-- [ ] Configure watchdog webhook (${cfg.watchdog.enabled ? 'enabled' : 'disabled'}).
-- [ ] Add monitor alerting for 5+ minute downtime.
-- [ ] Verify backup policy for tenant state/workspace volumes.
-
-## Upstream Update Procedure
-- [ ] Track OpenClaw ${cfg.updateRing} ring updates.
-- [ ] Regenerate artifacts on update.
-- [ ] Re-run golden tests before rollout.
-`;
+  return `# TASKS\n\n## Tenant Provisioning\n- [ ] Create tenant workspace and state volumes for \`${cfg.tenantId}\`.\n- [ ] Set \`OPENCLAW_GATEWAY_TOKEN\` in secret manager / secret file.\n- [ ] Set Mission Control token file at \`${cfg.controlPlane.missionControlTokenFile}\`.\n- [ ] Generate workspace artifacts from harness.\n\n## Security Baseline\n- [ ] Confirm DM pairing: ${cfg.channels.dmPairingRequired ? 'enabled' : 'disabled'}.\n- [ ] Confirm mention gating: ${cfg.channels.mentionGating ? 'enabled' : 'disabled'}.\n- [ ] Review tool allow/deny lists before go-live.\n- [ ] Verify non-main session sandboxing is ${cfg.sandbox.nonMainSessionsIsolated ? 'enabled' : 'disabled'}.\n\n## Messaging Channels\n- [ ] Configure WhatsApp integration (${cfg.channels.whatsapp ? 'enabled in harness' : 'disabled in harness'}).\n- [ ] Configure Telegram integration (${cfg.channels.telegram ? 'enabled in harness' : 'disabled in harness'}).\n- [ ] Ensure token injection uses runtime secret files, not committed env values.\n\n## Model Policy\n- [ ] Enforce primary model: ${cfg.modelPolicy.primary}\n- [ ] Confirm fallback list: ${cfg.modelPolicy.fallbacks.join(', ') || '(none)'}\n- [ ] Confirm runtime overrides are blocked: ${!cfg.modelPolicy.allowRuntimeOverride}\n- [ ] Validate fallback triggers: ${cfg.modelPolicy.fallbackOn.join(', ')}\n\n## Control Plane Policy\n- [ ] Confirm Mission Control URL: ${cfg.controlPlane.missionControlUrl}\n- [ ] Confirm tier: ${cfg.controlPlane.tier}\n- [ ] Confirm pack ref: ${cfg.controlPlane.packRef}\n- [ ] Confirm telemetry enabled: ${cfg.controlPlane.telemetry.enabled}\n- [ ] Confirm privacy flags: tenant=${cfg.controlPlane.privacy.crossTenantLearning}, user=${cfg.controlPlane.privacy.crossUserLearning}\n\n## Recovery Policy\n- [ ] Confirm recovery order: ${cfg.recovery.teamOrder.join(' -> ')}\n- [ ] Confirm single-owner recovery mode: ${cfg.recovery.singleOwner}\n- [ ] Confirm recovery cooldown seconds: ${cfg.recovery.cooldownSeconds}\n\n## Supermemory\n- [ ] Create scoped API key per tenant.\n- [ ] Validate containerTag: ${cfg.memory.supermemory.containerTag ?? '(not configured)'}.\n- [ ] Validate ingestion + retrieval smoke test.\n\n## Operations\n- [ ] Deploy compose stack and confirm healthcheck passes.\n- [ ] Configure watchdog webhook (${cfg.watchdog.enabled ? 'enabled' : 'disabled'}).\n- [ ] Verify runtime can resolve champion pack via Mission Control.\n- [ ] Verify runtime telemetry reaches Mission Control for each run.\n- [ ] Add monitor alerting for 5+ minute downtime.\n- [ ] Verify backup policy for tenant state/workspace volumes.\n\n## Upstream Update Procedure\n- [ ] Track OpenClaw ${cfg.updateRing} ring updates.\n- [ ] Regenerate artifacts on update.\n- [ ] Re-run golden tests before rollout.\n`;
 }
 
 export function renderEnvExample(cfg: HarnessConfig): string {
-  return `# Required (inject at runtime, never commit real values)
-OPENCLAW_GATEWAY_TOKEN_FILE=/run/secrets/openclaw_gateway_token
-MISSION_CONTROL_REQUIRED=${cfg.missionControl.required}
-MISSION_CONTROL_API_URL=${cfg.missionControl.apiUrl}
-PROMPT_GATE_ENABLED=${cfg.missionControl.enforcePromptGate}
-PROMPT_PRIVACY_MODE=${cfg.missionControl.privacyMode}
-AUTO_PROMPT_TRAINING=${cfg.missionControl.autoPromptTraining}
-
-# Optional model policy overrides (prefer harness defaults)
-MODEL_PRIMARY=${cfg.modelPolicy.primary}
-MODEL_FALLBACKS=${cfg.modelPolicy.fallbacks.join(',')}
-MODEL_LOCK_ROUTES=${cfg.modelPolicy.lockRoutes}
-MODEL_ALLOW_RUNTIME_OVERRIDE=${cfg.modelPolicy.allowRuntimeOverride}
-
-# Optional Supermemory
-SUPERMEMORY_API_KEY_FILE=/run/secrets/supermemory_api_key
-SUPERMEMORY_CONTAINER_TAG=${cfg.memory.supermemory.containerTag ?? cfg.tenantId}
-
-# Optional Telegram
-TELEGRAM_BOT_TOKEN_FILE=/run/secrets/telegram_bot_token
-
-# Optional watchdog
-WATCHDOG_WEBHOOK_URL=${cfg.watchdog.webhookUrl ?? ''}
-`;
+  return `# Required (inject at runtime, never commit real values)\nOPENCLAW_GATEWAY_TOKEN_FILE=/run/secrets/openclaw_gateway_token\nMISSION_CONTROL_URL=${cfg.controlPlane.missionControlUrl}\nMISSION_CONTROL_TOKEN_FILE=${cfg.controlPlane.missionControlTokenFile}\nMISSION_CONTROL_TIER=${cfg.controlPlane.tier}\nMISSION_CONTROL_PACK_REF=${cfg.controlPlane.packRef}\nMISSION_CONTROL_TELEMETRY_ENABLED=${cfg.controlPlane.telemetry.enabled}\nMISSION_CONTROL_CROSS_TENANT_LEARNING=${cfg.controlPlane.privacy.crossTenantLearning}\nMISSION_CONTROL_CROSS_USER_LEARNING=${cfg.controlPlane.privacy.crossUserLearning}\nMISSION_CONTROL_PERSONA_PRESET_REF=${cfg.persona.presetRef}\nMISSION_CONTROL_PERSONA_MODE=${cfg.persona.mode}\nMISSION_CONTROL_ONBOARDING_RECOMMENDATION_ENABLED=${cfg.onboarding.recommendationEnabled}\nMISSION_CONTROL_ONBOARDING_PERSONALIZED_DEFAULTS=${cfg.onboarding.personalizedDefaults.join(',')}\n\n# Optional model policy overrides (prefer harness defaults)\nMODEL_PRIMARY=${cfg.modelPolicy.primary}\nMODEL_FALLBACKS=${cfg.modelPolicy.fallbacks.join(',')}\nMODEL_LOCK_ROUTES=${cfg.modelPolicy.lockRoutes}\nMODEL_ALLOW_RUNTIME_OVERRIDE=${cfg.modelPolicy.allowRuntimeOverride}\nMODEL_REASONING_DEFAULT=${cfg.reasoningPolicy.default}\nMODEL_REASONING_FALLBACK_BEHAVIOR=${cfg.reasoningPolicy.fallbackBehavior}\n\n# Optional Supermemory\nSUPERMEMORY_API_KEY_FILE=/run/secrets/supermemory_api_key\nSUPERMEMORY_CONTAINER_TAG=${cfg.memory.supermemory.containerTag ?? cfg.tenantId}\n\n# Optional Telegram\nTELEGRAM_BOT_TOKEN_FILE=/run/secrets/telegram_bot_token\n\n# Optional watchdog\nWATCHDOG_WEBHOOK_URL=${cfg.watchdog.webhookUrl ?? ''}\n`;
 }

@@ -43,9 +43,17 @@ services:
     environment:
       OPENCLAW_GATEWAY_TOKEN: \${OPENCLAW_GATEWAY_TOKEN}
       OPENCLAW_WORKSPACE: /workspace
+      MISSION_CONTROL_URL: ${cfg.controlPlane.missionControlUrl}
+      MISSION_CONTROL_TOKEN_FILE: ${cfg.controlPlane.missionControlTokenFile}
+      MISSION_CONTROL_TIER: ${cfg.controlPlane.tier}
+      MISSION_CONTROL_PACK_REF: ${cfg.controlPlane.packRef}
+      MISSION_CONTROL_TELEMETRY_ENABLED: "${cfg.controlPlane.telemetry.enabled}"
+      MISSION_CONTROL_CROSS_TENANT_LEARNING: "${cfg.controlPlane.privacy.crossTenantLearning}"
+      MISSION_CONTROL_CROSS_USER_LEARNING: "${cfg.controlPlane.privacy.crossUserLearning}"
     volumes:
       - tenant-${cfg.tenantId}-state:/state
       - tenant-${cfg.tenantId}-workspace:/workspace
+      - \${MISSION_CONTROL_TOKEN_HOST_PATH:-./secrets/mission_control_token}:${cfg.controlPlane.missionControlTokenFile}:ro
     healthcheck:
       test: ["CMD-SHELL", "node dist/index.js health --token $OPENCLAW_GATEWAY_TOKEN"]
       interval: 30s

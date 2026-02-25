@@ -38,6 +38,23 @@
       "provider_cooldown"
     ]
   },
+  "reasoningPolicy": {
+    "default": "max",
+    "fallbackBehavior": "highest_or_model_default"
+  },
+  "persona": {
+    "presetRef": "default-team",
+    "mode": "team",
+    "orchestratorEnabled": true
+  },
+  "onboarding": {
+    "recommendationEnabled": true,
+    "personalizedDefaults": [
+      "voice",
+      "uplay_chromium"
+    ],
+    "autoNotebooklmPrompt": true
+  },
   "recovery": {
     "teamOrder": [
       "FRIDAY",
@@ -50,7 +67,18 @@
   },
   "controlPlane": {
     "missionControlManaged": true,
-    "allowSelfMutation": false
+    "allowSelfMutation": false,
+    "missionControlUrl": "http://mission-control:8000",
+    "missionControlTokenFile": "/run/secrets/mission_control_token",
+    "tier": "enterprise",
+    "packRef": "engineering-delivery-pack@2",
+    "telemetry": {
+      "enabled": true
+    },
+    "privacy": {
+      "crossTenantLearning": false,
+      "crossUserLearning": false
+    }
   },
   "distribution": {
     "generatedBy": "kr8tiv-claw-harness-compiler"
