@@ -84,6 +84,41 @@ export const HarnessSchema = z
         allowRuntimeOverride: false,
         fallbackOn: ['rate_limit', 'provider_cooldown', 'billing_disabled', 'auth_profile_unavailable']
       }),
+    reasoningPolicy: z
+      .object({
+        default: z.enum(['max', 'high', 'normal', 'off']).default('max'),
+        fallbackBehavior: z
+          .enum(['highest_or_model_default', 'model_default'])
+          .default('highest_or_model_default')
+      })
+      .default({
+        default: 'max',
+        fallbackBehavior: 'highest_or_model_default'
+      }),
+    persona: z
+      .object({
+        presetRef: z.string().min(1).default('default-team'),
+        mode: z.enum(['team', 'individual']).default('team'),
+        orchestratorEnabled: z.boolean().default(true)
+      })
+      .default({
+        presetRef: 'default-team',
+        mode: 'team',
+        orchestratorEnabled: true
+      }),
+    onboarding: z
+      .object({
+        recommendationEnabled: z.boolean().default(true),
+        personalizedDefaults: z
+          .array(z.enum(['voice', 'uplay_chromium', 'mission_control_tasks', 'notebooklm']))
+          .default(['voice', 'uplay_chromium']),
+        autoNotebooklmPrompt: z.boolean().default(true)
+      })
+      .default({
+        recommendationEnabled: true,
+        personalizedDefaults: ['voice', 'uplay_chromium'],
+        autoNotebooklmPrompt: true
+      }),
     recovery: z
       .object({
         teamOrder: z
@@ -189,6 +224,14 @@ export const HarnessSchema = z
         message: 'controlPlane.packRef must be formatted as <pack-key>@<version>'
       });
     }
+
+    if (data.persona.mode === 'individual' && data.persona.orchestratorEnabled) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['persona', 'orchestratorEnabled'],
+        message: 'persona.orchestratorEnabled must be false when persona.mode is individual'
+      });
+    }
   });
 
 export type HarnessConfig = z.infer<typeof HarnessSchema>;
@@ -223,6 +266,29 @@ export function getHarnessJsonShape(): Record<string, unknown> {
           lockRoutes: { type: 'boolean' },
           allowRuntimeOverride: { type: 'boolean' },
           fallbackOn: { type: 'array', items: { type: 'string' } }
+        }
+      },
+      reasoningPolicy: {
+        type: 'object',
+        properties: {
+          default: { type: 'string', enum: ['max', 'high', 'normal', 'off'] },
+          fallbackBehavior: { type: 'string', enum: ['highest_or_model_default', 'model_default'] }
+        }
+      },
+      persona: {
+        type: 'object',
+        properties: {
+          presetRef: { type: 'string' },
+          mode: { type: 'string', enum: ['team', 'individual'] },
+          orchestratorEnabled: { type: 'boolean' }
+        }
+      },
+      onboarding: {
+        type: 'object',
+        properties: {
+          recommendationEnabled: { type: 'boolean' },
+          personalizedDefaults: { type: 'array', items: { type: 'string' } },
+          autoNotebooklmPrompt: { type: 'boolean' }
         }
       },
       recovery: {

@@ -15,6 +15,13 @@ describe('harness schema validation', () => {
     expect(parsed.sandbox.nonMainSessionsIsolated).toBe(true);
     expect(parsed.modelPolicy.primary).toBe('openai-codex/gpt-5.3-codex');
     expect(parsed.modelPolicy.lockRoutes).toBe(true);
+    expect(parsed.reasoningPolicy.default).toBe('max');
+    expect(parsed.reasoningPolicy.fallbackBehavior).toBe('highest_or_model_default');
+    expect(parsed.persona.presetRef).toBeDefined();
+    expect(parsed.persona.mode).toBe('team');
+    expect(parsed.onboarding.recommendationEnabled).toBe(true);
+    expect(parsed.onboarding.personalizedDefaults).toContain('voice');
+    expect(parsed.onboarding.personalizedDefaults).toContain('uplay_chromium');
     expect(parsed.recovery.teamOrder).toEqual(['FRIDAY', 'ARSENAL', 'JOCASTA', 'EDITH']);
     expect(parsed.controlPlane.missionControlUrl).toBe('http://mission-control:8000');
     expect(parsed.controlPlane.telemetry.enabled).toBe(true);

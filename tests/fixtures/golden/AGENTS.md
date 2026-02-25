@@ -15,6 +15,15 @@ You are ACME Concierge, Team operations concierge.
 - lock_routes: true
 - runtime_override_allowed: false
 
+## Reasoning + Persona Policy
+- reasoning_default: max
+- reasoning_fallback_behavior: highest_or_model_default
+- persona_preset_ref: default-team
+- persona_mode: team
+- orchestrator_enabled: true
+- onboarding_recommendation_enabled: true
+- onboarding_personalized_defaults: voice, uplay_chromium
+
 ## Mission Control Runtime Contract
 - mission_control_url: http://mission-control:8000
 - tier: enterprise

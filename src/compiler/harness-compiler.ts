@@ -52,6 +52,20 @@ export function buildOpenClawConfig(cfg: HarnessConfig): Record<string, unknown>
       allowRuntimeOverride: cfg.modelPolicy.allowRuntimeOverride,
       fallbackOn: cfg.modelPolicy.fallbackOn
     },
+    reasoningPolicy: {
+      default: cfg.reasoningPolicy.default,
+      fallbackBehavior: cfg.reasoningPolicy.fallbackBehavior
+    },
+    persona: {
+      presetRef: cfg.persona.presetRef,
+      mode: cfg.persona.mode,
+      orchestratorEnabled: cfg.persona.orchestratorEnabled
+    },
+    onboarding: {
+      recommendationEnabled: cfg.onboarding.recommendationEnabled,
+      personalizedDefaults: cfg.onboarding.personalizedDefaults,
+      autoNotebooklmPrompt: cfg.onboarding.autoNotebooklmPrompt
+    },
     recovery: {
       teamOrder: cfg.recovery.teamOrder,
       singleOwner: cfg.recovery.singleOwner,
