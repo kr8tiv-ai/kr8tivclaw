@@ -28,6 +28,9 @@ describe('supermemory wrapper integration stubs (mock HTTP)', () => {
 
     const body = JSON.parse((mockFetch.mock.calls[0][1] as RequestInit).body as string);
     expect(body.strategy).toBe('hybrid');
+    expect(body.mode).toBe('hybrid');
+    expect(body.query).toBe('where is policy');
+    expect(body.q).toBe('where is policy');
     expect(body.threshold).toBe(1);
     expect(body.userId).toBe('u-1');
   });
@@ -61,5 +64,26 @@ describe('supermemory wrapper integration stubs (mock HTTP)', () => {
     const result = await client.retrieve({ query: 'retry me' });
     expect(result).toEqual({ ok: true });
     expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('normalizes search response variants into deduped context lines', async () => {
+    const mockFetch = vi.fn(async () =>
+      new Response(
+        JSON.stringify({
+          hits: [
+            { content: 'alpha' },
+            { text: 'alpha' },
+            { snippet: 'beta' },
+            { content: 'gamma' }
+          ]
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } }
+      )
+    );
+
+    const client = new SupermemoryClient({ apiKey: 'scoped-key', containerTag: 'tenant-tag', fetchImpl: mockFetch as typeof fetch });
+    const lines = await client.retrieveContextLines({ query: 'test', limit: 2 });
+
+    expect(lines).toEqual(['alpha', 'beta']);
   });
 });
