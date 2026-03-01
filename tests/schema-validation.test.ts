@@ -13,8 +13,9 @@ describe('harness schema validation', () => {
 
     expect(parsed.channels.dmPairingRequired).toBe(true);
     expect(parsed.sandbox.nonMainSessionsIsolated).toBe(true);
-    expect(parsed.modelPolicy.primary).toBe('openai-codex/gpt-5.3-codex');
+    expect(parsed.modelPolicy.primary).toBe('anthropic/claude-opus-4-6');
     expect(parsed.modelPolicy.lockRoutes).toBe(true);
+    expect(parsed.memory.retentionPolicy).toBe('supermemory-only');
     expect(parsed.reasoningPolicy.default).toBe('max');
     expect(parsed.reasoningPolicy.fallbackBehavior).toBe('highest_or_model_default');
     expect(parsed.persona.presetRef).toBeDefined();

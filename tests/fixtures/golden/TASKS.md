@@ -18,8 +18,8 @@
 - [ ] Ensure token injection uses runtime secret files, not committed env values.
 
 ## Model Policy
-- [ ] Enforce primary model: openai-codex/gpt-5.3-codex
-- [ ] Confirm fallback list: openai-codex/gpt-5-codex
+- [ ] Enforce primary model: anthropic/claude-opus-4-6
+- [ ] Confirm fallback list: (none)
 - [ ] Confirm runtime overrides are blocked: true
 - [ ] Validate fallback triggers: rate_limit, provider_cooldown
 

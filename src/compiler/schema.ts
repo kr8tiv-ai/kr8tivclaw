@@ -38,7 +38,7 @@ export const HarnessSchema = z
     memory: z
       .object({
         seed: z.array(z.string().min(1)).optional(),
-        retentionPolicy: z.string().min(1).default('local-first'),
+        retentionPolicy: z.string().min(1).default('supermemory-only'),
         supermemory: z
           .object({
             enabled: z.boolean().default(false),
@@ -67,7 +67,7 @@ export const HarnessSchema = z
       .default({ image: 'ghcr.io/openclaw/openclaw:latest' }),
     modelPolicy: z
       .object({
-        primary: z.string().min(1).default('openai-codex/gpt-5.3-codex'),
+        primary: z.string().min(1).default('anthropic/claude-opus-4-6'),
         fallbacks: z.array(z.string().min(1)).default([]),
         lockRoutes: z.boolean().default(true),
         allowRuntimeOverride: z.boolean().default(false),
@@ -78,7 +78,7 @@ export const HarnessSchema = z
           .default(['rate_limit', 'provider_cooldown', 'billing_disabled', 'auth_profile_unavailable'])
       })
       .default({
-        primary: 'openai-codex/gpt-5.3-codex',
+        primary: 'anthropic/claude-opus-4-6',
         fallbacks: [],
         lockRoutes: true,
         allowRuntimeOverride: false,

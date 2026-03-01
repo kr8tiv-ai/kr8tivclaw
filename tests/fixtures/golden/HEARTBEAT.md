@@ -2,7 +2,7 @@
 
 - watchdog_enabled: true
 - interval_seconds: 60
-- model_primary: openai-codex/gpt-5.3-codex
+- model_primary: anthropic/claude-opus-4-6
 - fallback_triggers: rate_limit, provider_cooldown
 - recovery_order: FRIDAY -> ARSENAL -> JOCASTA -> EDITH
 - updated_by: kr8tiv-claw harness compiler

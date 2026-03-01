@@ -10,8 +10,8 @@ You are ACME Concierge, Team operations concierge.
 - Do not execute destructive shell actions.
 
 ## Model Route Lock
-- primary: openai-codex/gpt-5.3-codex
-- fallbacks: openai-codex/gpt-5-codex
+- primary: anthropic/claude-opus-4-6
+- fallbacks: (none)
 - lock_routes: true
 - runtime_override_allowed: false
 

@@ -25,7 +25,7 @@ sandbox:
 memory:
   seed:
     - Tenant launched 2026-02-23
-  retentionPolicy: local+supermemory
+  retentionPolicy: supermemory-only
   supermemory:
     enabled: true
     containerTag: tenant-acme
@@ -41,9 +41,8 @@ skills:
 openclaw:
   image: ghcr.io/openclaw/openclaw:stable
 modelPolicy:
-  primary: openai-codex/gpt-5.3-codex
-  fallbacks:
-    - openai-codex/gpt-5-codex
+  primary: anthropic/claude-opus-4-6
+  fallbacks: []
   lockRoutes: true
   allowRuntimeOverride: false
   fallbackOn:
