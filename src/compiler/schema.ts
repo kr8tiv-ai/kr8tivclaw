@@ -182,6 +182,14 @@ export const HarnessSchema = z
       });
     }
 
+    if (data.memory.retentionPolicy !== 'supermemory-only') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['memory', 'retentionPolicy'],
+        message: 'memory.retentionPolicy must be supermemory-only'
+      });
+    }
+
     const allow = new Set(data.tooling.allow);
     const overlap = data.tooling.deny.filter((entry) => allow.has(entry));
     if (overlap.length > 0) {
